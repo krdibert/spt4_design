@@ -10,6 +10,7 @@ from phidl import path as pp
 import numpy as np
 
 
+#this function is from pete barry's ANL phidl repo
 def polypath_from_points(xypoints = [(0,0), (1,0), (1,1)], lw = None, name = None, inc_ports = True, layer = 0, **pathkwargs ):
     """Helper function to create a set of polygons that follow a path defined by xypoints.
 
