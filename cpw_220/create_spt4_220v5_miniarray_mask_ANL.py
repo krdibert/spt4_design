@@ -8,7 +8,6 @@ from phidl import Device
 from phidl import geometry as geo
 from phidl.quickplotter import quickplot as qp
 
-from pys4fab.core import tools
 from create_miniarray_chip import create_miniarray_chip
 
 import settings

@@ -642,8 +642,8 @@ def feedline_pad(feed_pars):
 
 def get_logos(layer):
 
-    anllogofile = 'logos/anl_logo.gds'
-    uclogofile  = 'logos/uc_logo.gds'
+    anllogofile = '../logos/anl_logo.gds'
+    uclogofile  = '../logos/uc_logo.gds'
 
     sf = 0.75
     anllogo = geo.import_gds(anllogofile, cellname = None, flatten = False)
