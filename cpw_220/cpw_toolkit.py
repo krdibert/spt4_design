@@ -36,6 +36,7 @@ tile_sidelength = 2*pix_radius-circle_sep
 
 factor=np.sqrt(3)/2.#np.sin(60*np.pi/180.)
 
+
 #create a set of array tiles
 def tile(s, capsize_x, capsize_y):
 
@@ -461,7 +462,177 @@ def connect_feedlines_tri(F):
 	return C, N
 
 
+##############################################################3
+# FOR MAKING A 25mm SQUARE CHIP
+########################################################
+
+#right now, the cap sizes just change by 10um
+def place_pixels_chip(design, cap_sizes):
+
+	count=0
+	D = Device()
+
+	#GND=Device()
+	NO_GND=Device()
+
+	row_polarity=1
+
+	feedline_array=[]
+	points=[]
+	
+	offset = tile_sidelength/2.
+
+	x=tile_sidelength/2.
+	if row_polarity<0: 
+			x+=offset
+	y=tile_sidelength/2.
+
+	fx = 0
+	fy = tile_sidelength
+	#if row_polarity<0: 
+	#		fy+=np.sin(60*np.pi/180.)*tile_sidelength
 
 
+	#left to right, top to bottom
+	for line in list(reversed(design)):
 
+		fx=x-tile_sidelength/2.
+
+		for i in range(len(line)):
+
+			char=line[i]
+
+			#place the tile
+			t=tile(char, cap_sizes[count*2], cap_sizes[count*2+1])
+			if char in ['H', 'Z', 'N', 'I']: count+=1
+			D.add_ref(t).move([x,y])
+
+			#add feedline points
+			#over
+			if char in ['H', 'Z', 'N', 'I', 'G']:
+				points.append((fx, fy-tile_sidelength/2. + factor*tile_sidelength/3.))
+				points.append((fx+tile_sidelength/2., fy-tile_sidelength/2 + factor*2*tile_sidelength/3.))
+				points.append((fx+tile_sidelength, fy-tile_sidelength/2. + factor*tile_sidelength/3.))
+
+				#cpw bridges
+				sio2_rect = geo.rectangle(size=(80,185), layer=layers['sio2']).movex(-40)
+				D.add_ref(sio2_rect).movex(fx+tile_sidelength/2.).movey(fy-tile_sidelength/2 + factor*2*tile_sidelength/3.-120)
+				bridge = Device()
+				strap = geo.rectangle(size=(10,300), layer=layers['bridge']).movex(-5)
+				pad = geo.rectangle(size=(112,80), layer=layers['bridge']).movex(-56)
+				bridge.add_ref(strap).movey(-123.5)
+				bridge.add_ref(pad).movey(-125)
+				bridge.add_ref(pad).movey(100)
+				D.add_ref(bridge).movex(fx+tile_sidelength/2.).movey(fy-tile_sidelength/2 + factor*2*tile_sidelength/3.-55)
+				if line[i-1] != '-':
+					D.add_ref(sio2_rect).movex(fx).movey(fy-tile_sidelength/2. + factor*tile_sidelength/3.-65)
+					D.add_ref(bridge).movex(fx).movey(fy-tile_sidelength/2. + factor*tile_sidelength/3.)
+
+
+				if char=='G':
+					x+=tile_sidelength
+					fx+=tile_sidelength 
+					continue
+
+				#gnd plane and cutout
+				#NOTE: make this into an irregular hexagon (two triangles and a rectangle)
+				triangle_fx_offset = pix_radius-feed_width-2*cpw_gap-cpw_gnd_wall
+				triangle_lo_fy_offset = -tile_sidelength/2. + factor*tile_sidelength/3.-circle_sep/2.
+				#triangle_hi_fy_offset = -tile_sidelength/2 + factor*2*tile_sidelength/3.-circle_sep
+				triangle_hi_fy_offset = triangle_lo_fy_offset + triangle_fx_offset*np.tan(np.pi/6.)
+				bevel_1=[(fx+tile_sidelength/2.-120*np.cos(np.pi/6.), fy+triangle_hi_fy_offset-120*np.sin(np.pi/6.)), (fx+tile_sidelength/2.+120*np.cos(np.pi/6.), fy+triangle_hi_fy_offset-120*np.sin(np.pi/6.))]
+				bevel_2 = [(bevel_1[0][0]+40, bevel_1[0][1]-40),(bevel_1[1][0]-40, bevel_1[1][1]-40)]
+				triangle_points=[(fx+tile_sidelength/2. - triangle_fx_offset, fy+triangle_lo_fy_offset), bevel_1[0], bevel_2[0], bevel_2[1], bevel_1[1], (fx+tile_sidelength/2.+triangle_fx_offset, fy+triangle_lo_fy_offset)]
+				#no_gnd=geo.circle(radius=pix_radius-feed_width-2*cpw_gap-cpw_gnd_wall, layer=layers["gnd"]).movex(x).movey(y)
+				rect_cutout_width = 2*(pix_radius-feed_width-2*cpw_gap-cpw_gnd_wall)
+				rect_cutout_height = tile_sidelength + 2*triangle_lo_fy_offset
+				no_gnd_rect = geo.rectangle(size=(rect_cutout_width, rect_cutout_height), layer=layers['gnd']).movex(x-rect_cutout_width/2.).movey(y-rect_cutout_height/2.)
+				NO_GND.add_ref(no_gnd_rect)
+				triangle=Device()
+				triangle.add_polygon(triangle_points, layer=layers['gnd'])
+				NO_GND.add_ref(triangle)
+				NO_GND.add_ref(triangle).mirror(p1=[fx, fy-tile_sidelength/2.], p2=[fx+tile_sidelength, fy-tile_sidelength/2.])
+				#gnd_blank = geo.rectangle(size=(tile_sidelength*1.2, tile_sidelength*1.2), layer=layers["gnd"]).movex(fx).movey(fy-tile_sidelength)
+				#GND.add_ref(gnd_blank)
+
+				
+			x+=tile_sidelength
+			fx+=tile_sidelength
+
+		#increment tile info
+		x=tile_sidelength/2.
+		if row_polarity>0: 
+			x+=offset
+		y+=factor*tile_sidelength
+
+		#make feedline
+		print(count)
+		path=comp.polypath_from_points(xypoints = points, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=100)
+		inv_cpw=comp.polypath_from_points(xypoints = points, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=100)
+		D.add_ref(path)
+		NO_GND.add_ref(inv_cpw)
+		feedline_array.append(points)
+		points=[]
+		fy+=factor*tile_sidelength
+
+		row_polarity*= -1
+
+	#D.add_ref(NO_GND)
+	#gnd_plane = geo.boolean(A=[GND], B=[NO_GND], operation='A-B', layer=layers['gnd'])	
+	#D.add_ref(gnd_plane)
+
+	print('Total pixel count: ' + str(count))
+
+	return D, feedline_array, NO_GND
+
+
+def connect_feedlines_chip(F):
+	C = Device(name='C')
+	N=Device()
+
+	i=0
+	pointer = 0
+	while i < len(F)-1:
+
+
+		if pointer == 0:
+		#right side
+			start=F[i][-1]
+			end=F[i+1][-1]
+			prev=F[i][-2]
+			connect=[(prev[0]+ (start[0]-prev[0])/2., prev[1] + (start[1]-prev[1])/2.)]
+			connect.append(start)
+			connect.append((start[0]+tile_sidelength/2., start[1]+ factor*tile_sidelength/3.))
+			connect.append(end)
+			nex=F[i+1][-2]
+			connect.append((end[0]+ (nex[0]-end[0])/2., end[1] + (nex[1]-end[1])/2.))
+			i+=1
+
+		elif pointer == 1:
+		#left side
+			start=F[i][0]
+			end=F[i+1][0]
+			prev=F[i][1]
+			connect=[(prev[0]+ (start[0]-prev[0])/2., prev[1] + (start[1]-prev[1])/2.)]
+			connect.append(start)
+			connect.append((start[0]-tile_sidelength/2., start[1]+ factor*tile_sidelength/3.))
+			connect.append(end)
+			nex=F[i+1][1]
+			connect.append((end[0]+ (nex[0]-end[0])/2., end[1] + (nex[1]-end[1])/2.))
+			i+=1
+
+		else: pass
+
+		pointer+=1
+		pointer=pointer%2
+		path = comp.polypath_from_points(xypoints=connect, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="smooth")#"circular bend", bend_radius=100)
+		C.add_ref(path)
+		Npath = comp.polypath_from_points(xypoints=connect, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="smooth")
+		N.add_ref(Npath)
+
+
+	C.add_port(name='p1', midpoint=F[-1][0], orientation=0)
+	C.add_port(name='p2', midpoint=F[0][0], orientation=0)
+
+	return C, N
 
