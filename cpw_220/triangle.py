@@ -1,4 +1,5 @@
-#triangle wafer for uc fab
+#812 detector triangle on a 4 inch wafer for uc fab
+#NOT READY FOR FAB. The frequency scheduling has not been done!
 
 from math import pi
 from matplotlib import pyplot as plt
@@ -48,6 +49,7 @@ triangle=[
 '-HZHZHZHZHZHZHZHZHZHZHZHZHZH',
 '-NINININININININININININININI',
 'GGGGGGGGGGGGGGGGGGGGGGGGGGGG']
+
 
 array = Device()
 SUBTRACT_GND = Device()
@@ -118,4 +120,4 @@ align = comp.wafer_alignment_marking()
 left_align_ref = array.add_ref(align).movex(-44000)
 left_align_ref = array.add_ref(align).movex(44000)
 
-array.write_gds("../mask_files/triangle.gds")
+array.write_gds("../../spt4_mask_files/triangle.gds")

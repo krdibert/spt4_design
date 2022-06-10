@@ -1,1 +1,1 @@
-from settings_files.settings_straight import *
+from settings_files.settings_spt4_array_test import *
