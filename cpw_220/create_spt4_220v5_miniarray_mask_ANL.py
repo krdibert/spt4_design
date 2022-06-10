@@ -138,4 +138,4 @@ left_align_ref = D.add_ref(align).movex(-54000)
 left_align_ref = D.add_ref(align).movex(54000)
 
 
-D.write_gds("../mask_files/miniarray_test.gds")
+D.write_gds("../../spt4_mask_files/miniarray_test.gds")
