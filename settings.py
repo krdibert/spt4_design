@@ -1,1 +1,0 @@
-from settings_files.settings_spt4_350_v1 import *
