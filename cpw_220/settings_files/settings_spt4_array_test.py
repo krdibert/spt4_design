@@ -32,10 +32,10 @@ wafer_pars={
 	"chip_offset" : 16000}
 
 #ANL wafer pars
-wafer_pars={
-	"outer_radius":150000/2.,
-	"outer_ring_thickness":5000,
-	"chip_offset" : 16000}
+#wafer_pars={
+#	"outer_radius":150000/2.,
+#	"outer_ring_thickness":5000,
+#	"chip_offset" : 16000}
 
 def get_wafer_settings():
 	return wafer_pars

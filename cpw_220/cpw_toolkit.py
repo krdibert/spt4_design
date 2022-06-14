@@ -40,6 +40,8 @@ factor=np.sqrt(3)/2.#np.sin(60*np.pi/180.)
 #create a set of array tiles
 def tile(s, capsize_x, capsize_y):
 
+	#if s!='G' and s!='-': print(str(capsize_x)+', '+str(capsize_y))
+
 	T = Device()
 	#if True: return T #use for debugging array placement
 
@@ -307,36 +309,6 @@ def place_pixels(design, cap_sizes):
 
 
 
-triangle=[
-'--------------Z',
-'--------------IN',
-'-------------HZH',
-'-------------NINI',
-'------------ZHZHZ',
-'------------INININ',
-'-----------HZHZHZH',
-'-----------NINININI',
-'----------ZHZHZHZHZ',
-'----------INININININ',
-'---------HZHZHZHZHZH',
-'---------NINININININI',
-'--------ZHZHZHZHZHZHZ',
-'--------INININININININ',
-'-------HZHZHZHZHZHZHZH',
-'-------NINININININININI',
-'------ZHZHZHZHZHZHZHZHZ',
-'------INININININININININ',
-'-----HZHZHZHZHZHZHZHZHZH',
-'-----NINININININININININI',
-'----ZHZHZHZHZHZHZHZHZHZHZ',
-'----INININININININININININ',
-'---HZHZHZHZHZHZHZHZHZHZHZH',
-'---NINININININININININININI',
-'--ZHZHZHZHZHZHZHZHZHZHZHZHZ',
-'--INININININININININININININ',
-'-HZHZHZHZHZHZHZHZHZHZHZHZHZH',
-'-NINININININININININININININI',
-'GGGGGGGGGGGGGGGGGGGGGGGGGGGG']
 
 
 def connect_feedlines_tri(F):

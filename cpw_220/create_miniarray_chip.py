@@ -95,7 +95,7 @@ def create_miniarray_chip(dev_design, dev_label, cap_sizes, design=chip):
 	s1 = pp.euler(radius=200, angle=60)
 	s2 = pp.straight(length=100)
 	s3 = pp.euler(radius=300, angle=90)
-	s4 = pp.straight(length=8770)
+	s4 = pp.straight(length=9750)#length=8770)
 	s5 = pp.euler(radius=200, angle=-90)
 	s6 = pp.straight(length=1800)
 
