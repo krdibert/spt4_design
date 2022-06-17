@@ -1,0 +1,1 @@
+from settings_files.settings_spt4_array_test_350 import *
