@@ -359,7 +359,7 @@ def y_abs_to_abs_path(y_abs_pars, y_abs_ref_upper, y_abs_ref_lower, layer=None):
     points=[]
     points.append(y_abs_ref_lower.ports['abs_1'].midpoint)
 
-    radius_separation = 40*y_abs_pars["lw"]
+    radius_separation = 260
     arc_radius = y_abs_ref_upper.ports['abs_2'].midpoint[1] + radius_separation
     points.append([y_abs_ref_lower.ports['abs_1'].midpoint[0], -arc_radius])
 

@@ -99,7 +99,7 @@ def y_350(u, start_length):
 	else: return start_length
 
 x_abs_pars = {
-		"num_unit"	: 81,
+		"num_unit"	: 78,
 		"lw"		: 2,
 		"start_length"	: 16,
 		"center_spacing" : 4,
@@ -107,7 +107,7 @@ x_abs_pars = {
 		"layer"		: None}
 
 y_abs_pars = {
-		"num_unit"	: 36,
+		"num_unit"	: 37,
 		"lw"		: 2,
 		"start_length"	: 16,
 		"center_spacing" : 4,
