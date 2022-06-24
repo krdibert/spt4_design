@@ -54,7 +54,9 @@ triangle=[
 array = Device()
 SUBTRACT_GND = Device()
 
-caps=np.linspace(600,1800,900)
+#set up banks for the resonators (much wider than we actually want in the end)
+
+caps=np.linspace(600,1900,812)
 
 D, F, NO_GND = place_pixels(triangle, caps)
 C, N = connect_feedlines_tri(F)
