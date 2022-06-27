@@ -80,6 +80,70 @@ def polypath_from_points(xypoints = [(0,0), (1,0), (1,1)], lw = None, name = Non
 
     return polypath
 
+def arc_idc_overlap(tine_overlap_angle=10, start_angle=0, theta=180, outer_radius=1000, tine_spacing=5, tine_linewidth=5, numtines=10, rail_width=10,
+        rail_extend_in = 0, rail_extend_out = 0,
+        layer = 0, **kwargs):
+
+    idc = phidl.Device(name = "idc")
+
+    tines = phidl.Device(name = "idc_tines")
+
+    cap_width = numtines*(tine_linewidth + tine_spacing) - tine_spacing
+    inner_radius = outer_radius - cap_width
+    
+
+    for i in range(numtines):
+
+        radius = outer_radius - i * (tine_spacing + tine_linewidth)
+        end_gap_angle = 180 * tine_spacing /(pi * radius)
+
+        #if i%2==0: tine = geo.arc(radius=radius, width = tine_linewidth, theta = (theta-tine_overlap_angle)/2. + tine_overlap_angle - end_gap_angle, start_angle = start_angle, angle_resolution = 1, layer = layer)
+        #else: tine = geo.arc(radius=radius, width = tine_linewidth, theta = (theta-tine_overlap_angle)/2. + tine_overlap_angle - end_gap_angle, start_angle = start_angle + (theta-tine_overlap_angle)/2. + end_gap_angle, angle_resolution = 1, layer = layer)
+
+        if i%2==0: tine = geo.arc(radius=radius, width = tine_linewidth, theta = (theta-tine_overlap_angle)/2. + tine_overlap_angle, start_angle = start_angle, angle_resolution = 1, layer = layer)
+        else: tine = geo.arc(radius=radius, width = tine_linewidth, theta = (theta-tine_overlap_angle)/2. + tine_overlap_angle, start_angle = start_angle + (theta-tine_overlap_angle)/2., angle_resolution = 1, layer = layer)
+
+        tine_ref = tines.add_ref(tine)
+
+
+    # create the rails
+    rail_extend_bottom = rail_extend_out
+    rail_extend_top = rail_extend_in
+
+    rails = geo.Device(name="idc_rails")
+    rail_height = cap_width + rail_extend_in + rail_extend_out
+    rail_radius = outer_radius + rail_extend_out
+
+    x_offset_0 = cos(radians(start_angle)) * rail_radius + sin(radians(start_angle)) * rail_width
+    y_offset_0 = sin(radians(start_angle)) * rail_radius - cos(radians(start_angle)) * rail_width
+    x_offset_1 = cos(radians(start_angle + theta)) * rail_radius  #- sin(radians(start_angle))# * tine_spacing
+    y_offset_1 = sin(radians(start_angle + theta)) * rail_radius #+ cos(radians(start_angle)) #* tine_spacing
+
+    rails.add_ref( geo.rectangle((-rail_height, rail_width ), layer = layer) ).rotate(start_angle).movex(x_offset_0).movey(y_offset_0)
+    rails.add_ref( geo.rectangle((-rail_height, rail_width ), layer = layer) ).rotate(start_angle+theta).movex(x_offset_1).movey(y_offset_1)
+                                                                            
+    idc.add_ref((tines, rails))
+
+    # add ports
+    out_port_radius = rail_radius
+    in_port_radius = outer_radius - rail_extend_in - cap_width
+
+    x_port_1 = cos(radians(start_angle)) * out_port_radius + sin(radians(start_angle)) * rail_width/2.
+    y_port_1 = sin(radians(start_angle)) * out_port_radius - cos(radians(start_angle)) * rail_width/2.
+    x_port_2 = cos(radians(start_angle)) * in_port_radius + sin(radians(start_angle)) * rail_width/2.
+    y_port_2 = sin(radians(start_angle)) * in_port_radius - cos(radians(start_angle)) * rail_width/2.
+    x_port_3 = cos(radians(start_angle + theta)) * out_port_radius - sin(radians(start_angle + theta)) * rail_width/2.
+    y_port_3 = sin(radians(start_angle + theta)) * out_port_radius + cos(radians(start_angle + theta)) * rail_width/2.
+    x_port_4 = cos(radians(start_angle + theta)) * in_port_radius  - sin(radians(start_angle + theta)) * rail_width/2.
+    y_port_4 = sin(radians(start_angle + theta)) * in_port_radius + cos(radians(start_angle + theta)) * rail_width/2.
+
+    idc.add_port( name = "idc_1", midpoint = (x_port_1, y_port_1), orientation = start_angle )
+    idc.add_port( name = "idc_2", midpoint = (x_port_2, y_port_2), orientation = start_angle + 180. )
+    idc.add_port( name = "idc_3", midpoint = (x_port_3, y_port_3), orientation = start_angle + theta )
+    idc.add_port( name = "idc_4", midpoint = (x_port_4, y_port_4), orientation = start_angle + theta + 180 )
+
+    return idc
+
 def arc_idc(start_angle=0, theta=180, outer_radius=1000, tine_spacing=5, tine_linewidth=5, numtines=10, rail_width=10,
         rail_extend_in = 0, rail_extend_out = 0,
         layer = 0, **kwargs):
@@ -140,6 +204,7 @@ def arc_idc(start_angle=0, theta=180, outer_radius=1000, tine_spacing=5, tine_li
     idc.add_port( name = "idc_4", midpoint = (x_port_4, y_port_4), orientation = start_angle + theta + 180 )
 
     return idc
+
 
 def rect_idc(tine_length = 1000, tine_spacing=5, tine_linewidth=5, numtines=10, rail_width=10,
         rail_extend_top = 0, rail_extend_bottom = 0,
