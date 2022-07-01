@@ -42,14 +42,15 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	y_offset = 4956
 
 	#opt1 = tile('I', cap_sizes[0], cap_sizes[1])
-	opt1, F1, nognd1  = place_pixels_chip(design, cap_sizes)
+	print(cap_sizes[0])
+	opt1, F1, nognd1  = place_pixels_chip(design, cap_sizes[0])
 	C1, N1  = connect_feedlines_chip(F1)
 	opt1.add_ref(C1)
 	array.add_ref(opt1).movex(6000).movey(6000)
 	NO_GND.add_ref(nognd1).movex(6000).movey(6000)
 	NO_GND.add_ref(N1).movex(6000).movey(6000)
 
-	opt2, F2, nognd2  = place_pixels_chip(design, cap_sizes)
+	opt2, F2, nognd2  = place_pixels_chip(design, cap_sizes[1])
 	C2, N2  = connect_feedlines_chip(F2)
 	opt2.add_ref(C2)
 	array.add_ref(opt2).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(6000)
@@ -58,7 +59,7 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 
 
 	
-	opt3, F3, nognd3  = place_pixels_chip(design, cap_sizes)
+	opt3, F3, nognd3  = place_pixels_chip(design, cap_sizes[2])
 	C3, N3  = connect_feedlines_chip(F3)
 	opt3.add_ref(C3)
 	array.add_ref(opt3).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(-6000)
@@ -66,7 +67,7 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	NO_GND.add_ref(N3).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(-6000)
 
 	
-	opt4, F4, nognd4  = place_pixels_chip(design, cap_sizes)
+	opt4, F4, nognd4  = place_pixels_chip(design, cap_sizes[3])
 	C4, N4  = connect_feedlines_chip(F4)
 	opt4.add_ref(C4)
 	array.add_ref(opt4).movex(6000).movey(-6000)
@@ -288,6 +289,6 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 
 
 #cap_sizes=[1800,1800,1800,1800,1800,1800,1800,1800]
-cap_sizes=np.multiply(1800, np.ones(1000))
-test = create_optbox_chip('spt4v5', 'test', cap_sizes)
-test.write_gds("../../spt4_mask_files/optbox_test.gds")
+#cap_sizes=np.multiply(1800, np.ones(1000))
+#test = create_optbox_chip('spt4v5', 'test', cap_sizes)
+#test.write_gds("../../spt4_mask_files/optbox_test.gds")
