@@ -57,7 +57,7 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	NO_GND.add_ref(N2).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(6000)
 
 
-	'''
+	
 	opt3, F3, nognd3  = place_pixels_chip(design, cap_sizes)
 	C3, N3  = connect_feedlines_chip(F3)
 	opt3.add_ref(C3)
@@ -72,7 +72,6 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	array.add_ref(opt4).movex(6000).movey(-6000)
 	NO_GND.add_ref(nognd4).movex(6000).movey(-6000)
 	NO_GND.add_ref(N4).movex(6000).movey(-6000)
-	'''
 	
 
 	#path from cluster 1 to cluster 2
@@ -85,54 +84,73 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	start12 = (F1[0][0][0] + 6000, F1[0][0][1] + 6000)
 	vect12_pre = (start12[0]-pre12[0], start12[1]-pre12[1])
 
-	end12 = (F2[-1][-2][0] - 6000, F2[-1][-2][1] +6000)
-	post12 = (F2[-1][-3][0] - 6000, F2[-1][-3][1] +6000)
+	end12 = (F2[-1][-2][0] - 6000, F2[-1][-2][1] +6000 + ro)
+	post12 = (F2[-1][-3][0] - 6000, F2[-1][-3][1] +6000 + ro)
 	vect12_post = (end12[0]-post12[0], end12[1]-post12[1])
 
 	points12.append((pre12[0]+0.5*vect12_pre[0], pre12[1]+0.5*vect12_pre[1]))
 	points12.append((start12[0]+0.01*vect12_pre[0], start12[1]+0.01*vect12_pre[1]))
 	points12.append((start12[0]+0.01*vect12_pre[0]-1000, start12[1]+0.01*vect12_pre[1]))
 
-	points12.append((end12[0]+0.01*vect12_post[0]+1000, end12[1]+0.01*vect12_post[1]+ro))
-
-	points12.append((end12[0]+0.01*vect12_post[0], end12[1]+0.01*vect12_post[1]+ro))
-	points12.append((post12[0]+0.5*vect12_post[0], post12[1]+0.5*vect12_post[1]+ro))
-
-	
+	points12.append((end12[0]+0.01*vect12_post[0]+1000, end12[1]+0.01*vect12_post[1]))
+	points12.append((end12[0]+0.01*vect12_post[0], end12[1]+0.01*vect12_post[1]))
+	points12.append((post12[0]+0.5*vect12_post[0], post12[1]+0.5*vect12_post[1]))
 	
 	path12=comp.polypath_from_points(xypoints = points12, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=50)
 	inv_path12=comp.polypath_from_points(xypoints = points12, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
 	array.add_ref(path12)
 	NO_GND.add_ref(inv_path12)
 
-	'''
+	
 	#path from cluster 2 to cluster 3
-	pre23 = (F2[0][-3][0] - 6000, F2[0][-3][1] + 6000)
-	start23 = (F2[0][-2][0] - 6000, F2[0][-2][1] + 6000)
-	point23_1 = (F2[0][-2][0] - 5500, F2[0][-2][1] + 6000)
-	point23_2 = (F3[-1][-2][0] - 5500, F3[-1][-2][1] - 6000)
-	end23 = (F3[-1][-2][0] - 6000, F3[-1][-2][1] - 6000)
-	post23 = (F3[-1][-3][0] - 6000, F3[-1][-3][1] - 6000)
-	points23 = [pre23, start23, point23_1, point23_2, end23, post23]
+	points23 = []
+	pre23 = (F2[0][-3][0] - 6000, F2[0][-3][1] + 6000 + ro)
+	start23 = (F2[0][-2][0] - 6000, F2[0][-2][1] + 6000 + ro)
+	vect23_pre = (start23[0]-pre23[0], start23[1]-pre23[1])
+
+	end23 = (F3[-1][-2][0] - 6000, F3[-1][-2][1] - 6000 + ro)
+	post23 = (F3[-1][-3][0] - 6000, F3[-1][-3][1] - 6000 + ro)
+	vect23_post = (end23[0]-post23[0], end23[1]-post23[1])
+
+	points23.append((pre23[0]+0.5*vect23_pre[0], pre23[1]+0.5*vect23_pre[1]))
+	points23.append((start23[0]+0.01*vect23_pre[0], start23[1]+0.01*vect23_pre[1]))
+	points23.append((start23[0]+0.01*vect23_pre[0]+1000, start23[1]+0.01*vect23_pre[1]))
+
+	points23.append((end23[0]+0.01*vect23_post[0]+1000, end23[1]+0.01*vect23_post[1]))
+	points23.append((end23[0]+0.01*vect23_post[0], end23[1]+0.01*vect23_post[1]))
+	points23.append((post23[0]+0.5*vect23_post[0], post23[1]+0.5*vect23_post[1]))
+
 	path23=comp.polypath_from_points(xypoints = points23, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=50)
 	inv_path23 = comp.polypath_from_points(xypoints = points23, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
 	array.add_ref(path23)
 	NO_GND.add_ref(inv_path23)
 
+	
 
 	#path from cluster 3 to cluster 4
-	pre34 = (F3[0][-3][0] - 6000, F3[0][-3][1] - 6000)
-	start34 = (F3[0][-2][0] - 6000, F3[0][-2][1] - 6000)
-	point34_1 = (F3[0][-2][0] - 5000, F3[0][-2][1] - 6000)
-	point34_2 = (F4[-1][0][0] + 5000, F4[-1][0][1] - 6000)
+
+	points34=[]
+	pre34 = (F3[0][-3][0] - 6000, F3[0][-3][1] - 6000 + ro)
+	start34 = (F3[0][-2][0] - 6000, F3[0][-2][1] - 6000 + ro)
+	vect34_pre=(start34[0]-pre34[0], start34[1]-pre34[1])
+
 	end34 = (F4[-1][0][0] + 6000, F4[-1][0][1] - 6000)
 	post34 = (F4[-1][1][0] + 6000, F4[-1][1][1] - 6000)
-	points34 = [pre34, start34, point34_1, point34_2, end34, post34]
+	vect34_post = (end34[0]-post34[0], end34[1]-post34[1])
+
+	points34.append((pre34[0]+0.5*vect34_pre[0], pre34[1]+0.5*vect34_pre[1]))
+	points34.append((start34[0]+0.01*vect34_pre[0], start34[1]+0.01*vect34_pre[1]))
+	points34.append((start34[0]+0.01*vect34_pre[0]+1000, start34[1]+0.01*vect34_pre[1]))
+
+	points34.append((end34[0]+0.01*vect34_post[0]-1000, end34[1]+0.01*vect34_post[1]))
+	points34.append((end34[0]+0.01*vect34_post[0], end34[1]+0.01*vect34_post[1]))
+	points34.append((post34[0]+0.5*vect34_post[0], post34[1]+0.5*vect34_post[1]))
+
 	path34 = comp.polypath_from_points(xypoints = points34, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=50)
 	inv_path34 = comp.polypath_from_points(xypoints = points34, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
 	array.add_ref(path34)
 	NO_GND.add_ref(inv_path34)
-	'''
+	
 
 
 	#dowel holes
