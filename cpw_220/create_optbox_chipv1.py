@@ -27,48 +27,38 @@ chip_pars=settings.get_chip_settings()
 from create_array_pixel import create_array_pixel
 from cpw_toolkit import tile, place_pixels_chip, connect_feedlines_chip
 
-chip=[
-'-HZHZHZHZG',
-'-GNINININI',
-'-HZHZHZHZG',
-'-GNINININI',
-'-HZHZHZHZG',
-'-GNINININI',
-'-HZHZHZHZG',
-'-GNINININI',
-'-HZHZHZHZG',
-'-GGGGGGGGG'
-]
+test_design = [
+	'NIG',
+	'HZH',
+	'ING',
+	'GGG']
 
-def create_optbox_chip(dev_design, dev_label, cap_sizes, design=chip):
+
+def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	array = Device()
 	NO_GND = Device()
 
 	x_offset = 3330
 	y_offset = 4956
 
-	test_design = [
-	'NIG',
-	'HZH',
-	'ING',
-	'GGG']
-
 	#opt1 = tile('I', cap_sizes[0], cap_sizes[1])
-	opt1, F1, nognd1  = place_pixels_chip(test_design, cap_sizes)
+	opt1, F1, nognd1  = place_pixels_chip(design, cap_sizes)
 	C1, N1  = connect_feedlines_chip(F1)
 	opt1.add_ref(C1)
 	array.add_ref(opt1).movex(6000).movey(6000)
 	NO_GND.add_ref(nognd1).movex(6000).movey(6000)
 	NO_GND.add_ref(N1).movex(6000).movey(6000)
 
-	opt2, F2, nognd2  = place_pixels_chip(test_design, cap_sizes)
+	opt2, F2, nognd2  = place_pixels_chip(design, cap_sizes)
 	C2, N2  = connect_feedlines_chip(F2)
 	opt2.add_ref(C2)
 	array.add_ref(opt2).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(6000)
 	NO_GND.add_ref(nognd2).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(6000)
 	NO_GND.add_ref(N2).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(6000)
 
-	opt3, F3, nognd3  = place_pixels_chip(test_design, cap_sizes)
+
+	'''
+	opt3, F3, nognd3  = place_pixels_chip(design, cap_sizes)
 	C3, N3  = connect_feedlines_chip(F3)
 	opt3.add_ref(C3)
 	array.add_ref(opt3).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(-6000)
@@ -76,27 +66,46 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=chip):
 	NO_GND.add_ref(N3).rotate(180, center=[x_offset,y_offset]).movex(-6000).movey(-6000)
 
 	
-	opt4, F4, nognd4  = place_pixels_chip(test_design, cap_sizes)
+	opt4, F4, nognd4  = place_pixels_chip(design, cap_sizes)
 	C4, N4  = connect_feedlines_chip(F4)
 	opt4.add_ref(C4)
 	array.add_ref(opt4).movex(6000).movey(-6000)
 	NO_GND.add_ref(nognd4).movex(6000).movey(-6000)
 	NO_GND.add_ref(N4).movex(6000).movey(-6000)
+	'''
 	
 
 	#path from cluster 1 to cluster 2
+
+	#rotation offset manual correction
+	ro=1.7
+
+	points12=[]
 	pre12 = (F1[0][1][0] + 6000, F1[0][1][1] + 6000)
 	start12 = (F1[0][0][0] + 6000, F1[0][0][1] + 6000)
-	point12_1 = (F1[0][0][0] + 5000, F1[0][0][1] + 6000)
-	point12_2 = (F2[-1][-2][0] - 5000, F2[-1][-2][1] +6000)
+	vect12_pre = (start12[0]-pre12[0], start12[1]-pre12[1])
+
 	end12 = (F2[-1][-2][0] - 6000, F2[-1][-2][1] +6000)
 	post12 = (F2[-1][-3][0] - 6000, F2[-1][-3][1] +6000)
-	points12=[pre12, start12, point12_1, point12_2, end12, post12]
+	vect12_post = (end12[0]-post12[0], end12[1]-post12[1])
+
+	points12.append((pre12[0]+0.5*vect12_pre[0], pre12[1]+0.5*vect12_pre[1]))
+	points12.append((start12[0]+0.01*vect12_pre[0], start12[1]+0.01*vect12_pre[1]))
+	points12.append((start12[0]+0.01*vect12_pre[0]-1000, start12[1]+0.01*vect12_pre[1]))
+
+	points12.append((end12[0]+0.01*vect12_post[0]+1000, end12[1]+0.01*vect12_post[1]+ro))
+
+	points12.append((end12[0]+0.01*vect12_post[0], end12[1]+0.01*vect12_post[1]+ro))
+	points12.append((post12[0]+0.5*vect12_post[0], post12[1]+0.5*vect12_post[1]+ro))
+
+	
+	
 	path12=comp.polypath_from_points(xypoints = points12, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=50)
 	inv_path12=comp.polypath_from_points(xypoints = points12, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
 	array.add_ref(path12)
 	NO_GND.add_ref(inv_path12)
 
+	'''
 	#path from cluster 2 to cluster 3
 	pre23 = (F2[0][-3][0] - 6000, F2[0][-3][1] + 6000)
 	start23 = (F2[0][-2][0] - 6000, F2[0][-2][1] + 6000)
@@ -123,7 +132,7 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=chip):
 	inv_path34 = comp.polypath_from_points(xypoints = points34, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
 	array.add_ref(path34)
 	NO_GND.add_ref(inv_path34)
-
+	'''
 
 
 	#dowel holes
@@ -135,6 +144,8 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=chip):
 	array.add_ref(hole).movex(10500).movex(x_offset).movey(y_offset)
 	slot = geo.rectangle((992.4, 794), layer=layers["drill_si_topside"])
 	array.add_ref(slot).movex(9500).movey(-397).movex(x_offset).movey(y_offset)
+
+	
 
 	'''
 
@@ -180,7 +191,7 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=chip):
 	trans_top_ref.connect(3, x1_top_ref.ports[2])
 	trans_cutout_top_ref.connect(3, x1_cutout_top_ref.ports[2])
 
-
+	
 
 	#bottom of feedline
 	start=F[0][0]
