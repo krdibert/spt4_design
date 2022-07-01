@@ -150,6 +150,44 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	inv_path34 = comp.polypath_from_points(xypoints = points34, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
 	array.add_ref(path34)
 	NO_GND.add_ref(inv_path34)
+
+
+	#path from cluster 1 to the top bondpad
+
+	points01= []
+	pre01 = (F1[-1][1][0] + 6000, F1[-1][1][1] + 6000)
+	start01 = (F1[-1][0][0] + 6000, F1[-1][0][1] + 6000)
+	vect01_pre=(start01[0]-pre01[0], start01[1]-pre01[1])
+
+	points01.append((pre01[0]+0.5*vect01_pre[0], pre01[1]+0.5*vect01_pre[1]))
+	points01.append((start01[0]+0.01*vect01_pre[0], start01[1]+0.01*vect01_pre[1]))
+	points01.append((x_offset+1000, start01[1]+0.01*vect01_pre[1]))
+	points01.append((x_offset,10000+y_offset))
+	points01.append((x_offset,12500+y_offset))
+
+	path01 = comp.polypath_from_points(xypoints = points01, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=50)
+	inv_path01 = comp.polypath_from_points(xypoints = points01, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
+	array.add_ref(path01)
+	NO_GND.add_ref(inv_path01)
+
+
+	#path from cluster 4 to the bottom bondpad
+
+	points45= []
+	pre45 = (F4[0][1][0] + 6000, F4[0][1][1] - 6000)
+	start45 = (F4[0][0][0] + 6000, F4[0][0][1] - 6000)
+	vect45_pre=(start45[0]-pre45[0], start45[1]-pre45[1])
+
+	points45.append((pre45[0]+0.5*vect45_pre[0], pre45[1]+0.5*vect45_pre[1]))
+	points45.append((start45[0]+0.01*vect45_pre[0], start45[1]+0.01*vect45_pre[1]))
+	points45.append((x_offset+1000, start45[1]+0.01*vect45_pre[1]))
+	points45.append((x_offset,-10000+y_offset))
+	points45.append((x_offset,-12500+y_offset))
+
+	path45 = comp.polypath_from_points(xypoints = points45, lw = feed_width, name = None, inc_ports = True, layer = layers['nb_base'], corners="circular bend", bend_radius=50)
+	inv_path45 = comp.polypath_from_points(xypoints = points45, lw = feed_width+2*cpw_gap, name = None, inc_ports = True, layer = layers['gnd'], corners="circular bend", bend_radius=50)
+	array.add_ref(path45)
+	NO_GND.add_ref(inv_path45)
 	
 
 
@@ -165,7 +203,7 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 
 	
 
-	'''
+	
 
 	#define cross sections of feedline transitions
 	X1=CrossSection()
@@ -181,66 +219,33 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	Xtrans_cutout=pp.transition(cross_section1=X1_cutout, cross_section2=X2_cutout, width_type='linear')
 
 	#top end of feedline
-	start=F[-1][0]
-	s0 = pp.straight(length=500)
-	s1=pp.euler(radius=200, angle=-120)
-	s2 = pp.straight(length=1000)
-	s3 = pp.euler(radius=500, angle=-90)
-	s4 = pp.straight(length=8770)
-	s5 = pp.euler(radius=300, angle=90)
-	s6 = pp.straight(length=1800)
+	start_top=(x_offset, y_offset+11000)
+	s0 = pp.straight(length=1500)
 
-	P_top=Path()
-	P_top.append([s0, s1, s2, s3, s4, s5])
-	x1_top=P_top.extrude(X1)
-	x1_cutout_top = P_top.extrude(X1_cutout)
-	x1_top_ref = D.add_ref(x1_top).rotate(-150).move(start)
-	x1_cutout_top_ref=NO_GND.add_ref(x1_cutout_top).rotate(-150).move(start)
-	
+
 	P_top_trans=Path()
-	P_top_trans.append([s6])
+	P_top_trans.append([s0])
 	trans_top=P_top_trans.extrude(Xtrans)
-	P_top_trans.append([pp.straight(length=800)])
+	P_top_trans.append([pp.straight(length=500)])
 	trans_cutout_top = P_top_trans.extrude(Xtrans_cutout)
-	trans_top_ref = D.add_ref(trans_top)
-	trans_cutout_top_ref=NO_GND.add_ref(trans_cutout_top)
+	trans_top_ref = array.add_ref(trans_top).rotate(90).move(start_top)
+	trans_cutout_top_ref=NO_GND.add_ref(trans_cutout_top).rotate(90).move(start_top)
 
-
-	trans_top_ref.connect(3, x1_top_ref.ports[2])
-	trans_cutout_top_ref.connect(3, x1_cutout_top_ref.ports[2])
-
-	
 
 	#bottom of feedline
-	start=F[0][0]
-	s0 = pp.straight(length=10)
-	s1 = pp.euler(radius=200, angle=60)
-	s2 = pp.straight(length=100)
-	s3 = pp.euler(radius=300, angle=90)
-	s4 = pp.straight(length=9700)#length=8770)
-	s5 = pp.euler(radius=200, angle=-90)
-	s6 = pp.straight(length=1800)
-
-
-	P_bottom=Path()
-	P_bottom.append([s0, s1, s2, s3, s4, s5])
-	x1_bottom=P_bottom.extrude(X1)
-	x1_cutout_bottom = P_bottom.extrude(X1_cutout)
-	x1_bottom_ref = D.add_ref(x1_bottom).rotate(-150).move(start)
-	x1_cutout_bottom_ref=NO_GND.add_ref(x1_cutout_bottom).rotate(-150).move(start)
+	start_bottom=(x_offset, y_offset-11000)
+	s0 = pp.straight(length=1500)
 
 	P_bottom_trans=Path()
-	P_bottom_trans.append([s6])
+	P_bottom_trans.append([s0])
 	trans_bottom=P_bottom_trans.extrude(Xtrans)
-	P_bottom_trans.append([pp.straight(length=800)])
+	P_bottom_trans.append([pp.straight(length=500)])
 	trans_cutout_bottom = P_bottom_trans.extrude(Xtrans_cutout)
-	trans_bottom_ref = D.add_ref(trans_bottom)
-	trans_cutout_bottom_ref=NO_GND.add_ref(trans_cutout_bottom)
+	trans_bottom_ref = array.add_ref(trans_bottom).rotate(270).move(start_bottom)
+	trans_cutout_bottom_ref=NO_GND.add_ref(trans_cutout_bottom).rotate(270).move(start_bottom)
 
 
-	trans_bottom_ref.connect(3, x1_bottom_ref.ports[2])
-	trans_cutout_bottom_ref.connect(3, x1_cutout_bottom_ref.ports[2])
-
+	
 	#cpw bridges
 	sio2_rect = geo.rectangle(size=(80,160), layer=layers['sio2']).movex(-40)
 	bridge = Device()
@@ -250,12 +255,17 @@ def create_optbox_chip(dev_design, dev_label, cap_sizes, design=test_design):
 	bridge.add_ref(strap)
 	bridge.add_ref(pad)
 	bridge.add_ref(pad).movey(210)
-	D.add_ref(bridge).movex(4050).movey(20884)
-	D.add_ref(bridge).movex(4050).movey(20884-20294)
-	D.add_ref(bridge).movex(10050).movey(20884)
-	D.add_ref(bridge).movex(10050).movey(20884-20294)
 
-	'''
+	#bridge locations
+	b12=(x_offset, y_offset+5650)
+	array.add_ref(bridge).rotate(-60).move(b12)
+	b23 = (x_offset-2000, y_offset)
+	array.add_ref(bridge).rotate(90).move(b23)
+	b34 = (x_offset, y_offset-6205)
+	array.add_ref(bridge).rotate(30).move(b34)
+
+	
+	
 	
 	#create box outline and stuff
 	outline = comp.optical_chip_outline(dev_design, dev_label, chip_pars)
